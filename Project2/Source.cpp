@@ -323,7 +323,6 @@ int **make2D(int*labData, int sizeX, int sizeY){
 		for (j = 0; j<sizeX; j++){
 
 			labdata2D[i][j] = labData[k];
-			printf("labdata[%d]=%d\n", k, labdata2D[i][j]);
 
 			k++;
 		}
@@ -334,17 +333,69 @@ int **make2D(int*labData, int sizeX, int sizeY){
 
 	return labdata2D;
 }
-bool move_kitchen(int **mat, int *positionkitchen, int direction){
+bool move_kitchen(int **mat, int **positionkitchen, int direction){
+
 	switch (direction)
 	{
+
 	case 0:
-		if ((mat[positionbed[0]][positionbed[1]] == 0) && (mat[positionbed[2]][positionbed[3]] )== 0;
-		break;
+
+		if ((mat[**positionkitchen-1][*(*positionkitchen+1)] == 0 || mat[**positionkitchen-1][*(*positionkitchen+1)] == 3) && (mat[*(*positionkitchen+2)-1][*(*positionkitchen+3)] == 3 || mat[*(*positionkitchen+2)-1][*(*positionkitchen+3)] == 0))
+		{
+			mat[**positionkitchen][*(*positionkitchen + 1)] = 0;
+			mat[*(*positionkitchen+2)][*(*positionkitchen + 3)] = 0;
+
+			printf("Whats happening");
+
+			**positionkitchen = **positionkitchen-1;
+			*(*positionkitchen + 2) = *(*positionkitchen + 2)-1;
+			///kitchen_in_matrix(mat, positionkitchen);
+			printf("tout le monde il veut seulement la thune ");
+
+			return true;
+		}
+		else {
+			printf("Whats happening %d ", mat[*(*positionkitchen + 2) - 1][*(*positionkitchen + 3)]);
+			return false;
+		}
+			break;
 	case 1:
+		if ((mat[**positionkitchen +1][*(*positionkitchen+1)] == 0 || mat[**positionkitchen +1][*(*positionkitchen+1)] == 3) && (mat[*(*positionkitchen+2) + 1][*(*positionkitchen+3)] == 3 || mat[*(*positionkitchen+2) + 1][*(*positionkitchen+3)] == 0))
+		{
+			mat[**positionkitchen][*(*positionkitchen + 1)] = 0;
+			mat[*(*positionkitchen + 2)][*(*positionkitchen + 3)] = 0;
+		**positionkitchen++;
+		*(*positionkitchen + 2) = *(*positionkitchen + 2) + 1;
+		///kitchen_in_matrix(mat, positionkitchen);
+			return true;
+		}
+		else return false;
 		break;
 	case 2:
+		if ((mat[**positionkitchen][*(*positionkitchen+1)-1] == 0 || mat[**positionkitchen][*(*positionkitchen+1)-1] == 3) && (mat[*(*positionkitchen+2)][*(*positionkitchen+3)-1] == 3 || mat[*(*positionkitchen+2)][*(*positionkitchen+3)-1] == 0))
+		{
+			mat[**positionkitchen][*(*positionkitchen + 1)] = 0;
+			mat[*(*positionkitchen + 2)][*(*positionkitchen + 3)] = 0;
+
+			*(*positionkitchen + 1) = *(*positionkitchen + 1) - 1;
+			*(*positionkitchen + 3) = *(*positionkitchen + 3) - 1;
+			///kitchen_in_matrix(mat, positionkitchen);
+			return true;
+		}
+		else return false;
 		break;
 	case 3:
+		if ((mat[**positionkitchen][*(*positionkitchen+1)+1] == 0 || mat[**positionkitchen ][*(*positionkitchen+1)+1] == 3) && (mat[*(*positionkitchen+2)][*(*positionkitchen+3)+1] == 3 || mat[*(*positionkitchen+2)][*(*positionkitchen+3)+1] == 0))
+		{
+			mat[**positionkitchen][*(*positionkitchen + 1)] = 0;
+			mat[*(*positionkitchen + 2)][*(*positionkitchen + 3)] = 0;
+
+		*(*positionkitchen + 1) = *(*positionkitchen + 1) + 1;
+		*(*positionkitchen + 3) = *(*positionkitchen + 3) + 1;
+			///kitchen_in_matrix(mat, positionkitchen);
+			return true;
+		}
+		else return false;
 		break;
 	}
 
@@ -395,12 +446,17 @@ int main(){
 	}
 	
 	///abs((mapositiony + sizeY) % sizeY - goalY) + abs(mapositionx - goalX);
-	int positionkitchen[4] = { 6, 8, 7, 8 };
-	
+	int *positionkitchen = (int*) malloc(sizeof(int)*4);
+///	positionkitchen = { 6, 8, 7, 8 };
+	positionkitchen[0] = 6;
+	positionkitchen[1] = 8;
+	positionkitchen[2] = 7;
+	positionkitchen[3] = 8;
+
 	int *cheminorig = astar(tabun, myX, myY, goalX, goalY, &cost_without_kitchen);
 	kitchen_in_matrix(tabun, positionkitchen);
 	int *cheminbis = astar(tabun, myX, myY, goalX, goalY, &cost_with_kitchen ); ///on considere que la cuisine est un obstacle
-
+	///moving_kitchen_in_matrix(tabun, positionkitchen);
 	int* chemin = (int*)malloc(sizeof(int) *cost_without_kitchen);
 	bool movekitchen = false;
 	if (cost_with_kitchen > cost_without_kitchen) {
@@ -409,17 +465,29 @@ int main(){
 	}
 	else  memcpy(chemin, cheminbis, cost_with_kitchen*sizeof(int));
 
-
+	int countdirection=0;
+	bool did_it_move;
 	if (movekitchen == true){
 		while (cost_with_kitchen > cost_without_kitchen)
 		{
+			printf("Sugofji \n");
+			affiche_mat(tabun, sizeY, sizeX, myX, myY, goalX, goalY, positionbed, 5, 5);
 
+			moving_kitchen_in_matrix(tabun, positionkitchen);
+			did_it_move= move_kitchen(tabun, &positionkitchen, countdirection);
+			moving_kitchen_in_matrix(tabun, positionkitchen);
 
+			if (did_it_move == false) countdirection++;
+			printf("Sugofji \n");
+		////	kitchen_in_matrix(tabun, positionkitchen);
+			cheminbis = astar(tabun, myX, myY, goalX, goalY, &cost_with_kitchen); ///on considere que la cuisine est un obstacle
+			printf("Sugofji post astar\n");
+
+			did_it_move=false;
+			affiche_mat(tabun, sizeY, sizeX, myX, myY, goalX, goalY, positionbed, 5, 5);
+			printf("Sugoi \n") ;
 		}
-
-
 	}
-
 
 	affiche_mat(tabun, sizeY, sizeX, myX, myY, goalX, goalY, positionbed, 5, 5);
 	print_rotation(firstcarrier.get_rotation());
